@@ -177,11 +177,16 @@ def eval_genomes(genomes, config):
 
         curr_max_fitness = 0
         curr_fitness = 0
+        prev_fitness = -1
+        stalled = False
+        stallCount = 0
 
-        while not is_start_screen():
+        while not is_start_screen() or not stalled:
 
             frame = cv2.resize(frame, (shapex, shapey))
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            cv2.imshow('image', frame)
+            cv2.waitKey(0)
             frame = frame.flatten()
 
             nnOutput = neural_network.activate(frame)
@@ -193,16 +198,26 @@ def eval_genomes(genomes, config):
             if curr_fitness > curr_max_fitness:
                 curr_max_fitness = curr_fitness
 
+            if curr_fitness <= prev_fitness:
+                stallCount += 1
+            else:
+                stallCount = 0
+
+            prev_fitness = curr_fitness
+
+            if stallCount > 200:
+                stalled = True
+
             frame = pyautogui.screenshot(region=(1, 125, 1342, 889))
             frame = cv2.cvtColor(np.array(frame), cv2.COLOR_RGB2BGR)
 
-            genome.fitness = curr_fitness
+            genome.fitness = curr_max_fitness
 
         driver.refresh()
         #if curr_max_fitness > best_fit:
-            #best_fit = curr_max_fitness
+        #best_fit = curr_max_fitness
         #fits.append(curr_max_fitness)
-        #print(str(genome_id) + " | Max Fitness = " + str(curr_max_fitness))
+        print(str(genome_id) + " | Max Fitness = " + str(curr_max_fitness))
 
     #printf("END OF GENERATION:\n  Best Fitness =  " + str(best_fit) +"\n  Avg Fitness  =  " + str(sum(fits)/len(fits)))
     driver.close()
@@ -219,7 +234,7 @@ def main():
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    p.add_reporter(neat.Checkpointer(10))
+    p.add_reporter(neat.Checkpointer(generation_interval=5))
 
     winner = p.run(eval_genomes)
 
