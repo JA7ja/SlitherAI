@@ -181,7 +181,7 @@ def eval_genomes(genomes, config):
         stalled = False
         stallCount = 0
 
-        while not is_start_screen() or not stalled:
+        while not is_start_screen() and not stalled:
 
             frame = cv2.resize(frame, (shapex, shapey))
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
