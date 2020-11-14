@@ -185,8 +185,6 @@ def eval_genomes(genomes, config):
 
             frame = cv2.resize(frame, (shapex, shapey))
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            cv2.imshow('image', frame)
-            cv2.waitKey(0)
             frame = frame.flatten()
 
             nnOutput = neural_network.activate(frame)
